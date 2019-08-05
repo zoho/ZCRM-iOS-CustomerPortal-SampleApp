@@ -1,1 +1,1 @@
-Sample iOS Portal App.
+Sample iOS Portal application.
