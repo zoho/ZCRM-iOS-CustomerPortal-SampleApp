@@ -1,0 +1,22 @@
+PODS:
+  - ZCRMiOS (2.0.0)
+
+DEPENDENCIES:
+  - ZCRMiOS (from `https://github.com/zoho/CRM-iOSSDK.git`, branch `V2_ALPHA`)
+
+EXTERNAL SOURCES:
+  ZCRMiOS:
+    :branch: V2_ALPHA
+    :git: https://github.com/zoho/CRM-iOSSDK.git
+
+CHECKOUT OPTIONS:
+  ZCRMiOS:
+    :commit: 3e4cd77a04dcc365dd0ce0590c959d8789877a04
+    :git: https://github.com/zoho/CRM-iOSSDK.git
+
+SPEC CHECKSUMS:
+  ZCRMiOS: e6f5afb4c627fee37d38c3e0f915872c5f9b9264
+
+PODFILE CHECKSUM: 81645e05367f296d708a41f493f51ffdfbc2a151
+
+COCOAPODS: 1.5.3

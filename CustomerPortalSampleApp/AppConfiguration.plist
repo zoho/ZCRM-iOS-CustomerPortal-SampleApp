@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+   AppConfiguration.plist
+   ZCRM-iOS-CustomerPortal-SampleApp
+
+   Created by Umashri R on 12/09/19.
+   Copyright (c) 2019 Umashri R. All rights reserved.
+-->
+<plist version="1.0">
+    <dict>
+        <key>ClientID</key>
+        <string>1001757695.ZY4GS26CW7V170488NCSB87GAVL5NH</string>
+        <key>ClientSecretID</key>
+        <string>b8b86d3912f680e820b4c54f9668fe854c4e4a1cf4</string>
+        <key>RedirectURLScheme</key>
+        <string>zcrmcp://</string>
+        <key>Type</key>
+        <string>ZCRMCP</string>
+        <key>ApiVersion</key>
+        <string>v2</string>
+        <key>DomainSuffix</key>
+        <string>com</string>
+        <key>AccessType</key>
+        <string>Production</string>
+        <key>AccountsURL</key>
+        <string>https://accounts.localzohoportal.com</string>
+        <key>LoginCustomization</key>
+        <string>false</string>
+        <key>OAuthScopes</key>
+        <array>
+            <string>ZohoCRM.settings.ALL</string>
+            <string>ZohoCRM.modules.ALL</string>
+            <string>ZohoCRM.users.READ</string>
+            <string>ZohoCRM.org.READ</string>
+            <string>Aaaserver.profile.Read</string>
+            <string>profile.userphoto.READ</string>
+        </array>
+        <key>FirstLaunch</key>
+        <false/>
+        <key>PortalID</key>
+        <string>1001757695</string>
+        <key>ApiBaseURL</key>
+        <string>crm.localzoho.com</string>
+    </dict>
+</plist>
