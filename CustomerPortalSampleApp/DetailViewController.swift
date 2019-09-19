@@ -34,9 +34,6 @@ class DetailViewController: UIViewController {
     
     override func viewWillAppear( _ animated : Bool )
     {
-        let logoutButton = UIBarButtonItem( title : "Logout", style : .plain, target : self, action : #selector( logout ) )
-        self.navigationItem.rightBarButtonItem = logoutButton
-        
         super.viewWillAppear( true )
         myView.backgroundColor = .white
         self.view = myView
@@ -75,7 +72,6 @@ class DetailViewController: UIViewController {
                                 if let value = record.getData()[ field.apiName ] as? String
                                 {
                                     footerDetails?.updateValue( value, forKey: field.apiName )
-                                    lastView = self.addData( label : field.displayLabel, value : value, previousView : lastView )
                                 }
                                 else if let value = record.getData()[ field.apiName ] as? Double
                                 {
@@ -91,7 +87,7 @@ class DetailViewController: UIViewController {
                                 }
                                 else
                                 {
-                                    print("Not handled")
+                                    ZCRMLogger.logInfo( message : "Invalid type encountered!!!" )
                                 }
                             }
                         }
@@ -146,15 +142,9 @@ class DetailViewController: UIViewController {
                             }
                             lastView = self.addData( label : field.displayLabel, value : String( value ), previousView : lastView )
                         }
-                        else if (record.getData()[ field.apiName ] as? [ String : Any ]) != nil
+                        else
                         {
-                            if !hasData
-                            {
-                                lastView = addSectionName( labelText : section.displayName, previousView : lastView, isFirst : isFirst )
-                                hasData = true
-                                isFirst = false
-                            }
-                            print( "Not handled" )
+                            ZCRMLogger.logInfo( message : "Invalid type encountered!!!" )
                         }
                     }
                 }
@@ -170,10 +160,9 @@ class DetailViewController: UIViewController {
         super.viewDidAppear( true )
     }
     
-    override func viewDidLoad() {
+    override func viewDidLoad()
+    {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
     }
     
     func addSectionName( labelText : String, previousView : UIView, isFirst : Bool ) -> UIView
@@ -260,28 +249,6 @@ class DetailViewController: UIViewController {
         
         return collectionView
     }
-    
-    @objc func logout()
-    {
-        ( UIApplication.shared.delegate as! AppDelegate ).logout(completion: { (success) in
-            if( success == true )
-            {
-                print("logout successful")
-            }
-        })
-    }
-    
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }
 
 extension DetailViewController : UICollectionViewDataSource

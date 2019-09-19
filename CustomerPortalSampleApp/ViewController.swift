@@ -50,6 +50,156 @@ class ViewController: UIViewController {
         self.view.backgroundColor = .white
         self.view.addSubview( self.profilePhoto )
         
+        addSubViews()
+        
+        self.title = "ZCRMCPApp"
+        self.navigationItem.title = "ZCRMCPApp"
+    }
+    
+    override func viewDidAppear(_ animated: Bool)
+    {
+        self.profilePhoto.contentMode = .scaleAspectFit
+        self.tableView.rowHeight = self.tableView.frame.height / 3
+    }
+    
+    override func viewDidLayoutSubviews()
+    {
+        super.viewDidLayoutSubviews()
+    }
+    
+    override func viewDidLoad()
+    {
+        super.viewDidLoad()
+        
+        ( UIApplication.shared.delegate as! AppDelegate ).loadLoginView { ( success ) in
+            if( success == true )
+            {
+                ((UIApplication.shared.delegate) as! AppDelegate).initZCRMSDK()
+                print( "Login successful" )
+            }
+        }
+    }
+    
+    @objc func getQuotes()
+    {
+        getRecords( moduleAPIName : "Quotes" )
+    }
+    
+    @objc func getInvoices()
+    {
+        getRecords( moduleAPIName : "Invoices" )
+    }
+    
+    @objc func getCases()
+    {
+        getRecords( moduleAPIName : "Cases" )
+    }
+    
+    @objc func logout()
+    {
+        ( UIApplication.shared.delegate as! AppDelegate ).logout(completion: { (success) in
+            if( success == true )
+            {
+                ZCRMLogger.logInfo(message: "Logout successful")
+            }
+        })
+    }
+    
+    func getRecords( moduleAPIName : String )
+    {
+        ZCRMSDKUtil.getModuleDelegate(apiName: moduleAPIName ).getRecords(recordParams: ZCRMQuery.GetRecordParams()) { ( result ) in
+            do
+            {
+                let resp = try result.resolve()
+                self.getLayouts( moduleAPIName : moduleAPIName )
+                self.records = resp.data
+                self.pushViewController()
+            }
+            catch
+            {
+                ZCRMLogger.logError( message : "Record could not be fetched!! Error : \( error )" )
+            }
+        }
+    }
+    
+    func getLayouts( moduleAPIName : String )
+    {
+        ZCRMSDKUtil.getModuleDelegate( apiName : moduleAPIName ).getLayouts { ( result ) in
+            do
+            {
+                let resp = try result.resolve()
+                self.layouts = resp.data
+                self.listViewController.layouts = self.layouts
+            }
+            catch
+            {
+                ZCRMLogger.logError( message : "Layouts could not be fetched!! Error : \( error )" )
+            }
+        }
+    }
+    
+    func pushViewController()
+    {
+        self.navigationController?.pushViewController( self.listViewController, animated : true )
+        self.listViewController.records = self.records
+    }
+    
+    func getContact()
+    {
+        ZCRMSDKUtil.getModuleDelegate(apiName: "Contacts").getRecords(recordParams: ZCRMQuery.GetRecordParams()) { ( result ) in
+            do
+            {
+                let resp = try result.resolve()
+                if !(resp.data.count == 1)
+                {
+                    ZCRMLogger.logError( message : "More than one record found!!" )
+                }
+                else
+                {
+                    self.contact = resp.data[0]
+                    if let contactName = self.contact?.getData()[ "Last_Name" ] as? String
+                    {
+                        self.welcomeLabel.text = "Welcome, " + contactName
+                    }
+                    if let email = self.contact?.getData()[ "Email" ] as? String
+                    {
+                        self.userLabel.text = email
+                    }
+                    self.downloadPhoto()
+                }
+            }
+            catch
+            {
+                ZCRMLogger.logError( message : "Record could not be fetched!! Error : \( error )" )
+            }
+        }
+    }
+    
+    func downloadPhoto()
+    {
+        self.contact?.downloadPhoto(completion: { ( photoResult ) in
+            do
+            {
+                let photoResp = try photoResult.resolve()
+                let photoData = photoResp.getFileData()
+                if let data = photoData
+                {
+                    let image = UIImage(data: data)
+                    DispatchQueue.main.async {
+                        self.viewDidAppear( true )
+                        self.profilePhoto.image = image
+                    }
+                }
+            }
+            catch
+            {
+                ZCRMLogger.logError( message : "Photo could not be downloaded!! Error : \( error )" )
+            }
+        })
+    }
+    
+    func addSubViews()
+    {
         let space1 = UILayoutGuide()
         self.view.addLayoutGuide( space1 )
         
@@ -91,6 +241,7 @@ class ViewController: UIViewController {
         self.view.addLayoutGuide( space5 )
         
         self.getContact()
+        welcomeLabel.text = "Welcome"
         welcomeLabel.textAlignment = .center
         welcomeLabel.translatesAutoresizingMaskIntoConstraints = false
         self.view.addSubview( welcomeLabel )
@@ -203,190 +354,6 @@ class ViewController: UIViewController {
         space10.trailingAnchor.constraint( equalTo : self.view.safeAreaLayoutGuide.trailingAnchor ).isActive = true
         space10.topAnchor.constraint( equalTo : getCasesButton.bottomAnchor ).isActive = true
         space10.bottomAnchor.constraint( equalTo : self.view.safeAreaLayoutGuide.bottomAnchor ).isActive = true
-        
-        self.title = "ZCRMCPApp"
-        self.navigationItem.title = "ZCRMCPApp"
     }
-    
-    override func viewDidAppear(_ animated: Bool)
-    {
-        //        self.profilePhoto.layer.cornerRadius = self.profilePhoto.frame.height / 2
-        self.profilePhoto.contentMode = .scaleAspectFit
-        self.tableView.rowHeight = self.tableView.frame.height / 3
-    }
-    
-    override func viewDidLayoutSubviews()
-    {
-        super.viewDidLayoutSubviews()
-    }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        ( UIApplication.shared.delegate as! AppDelegate ).loadLoginView { ( success ) in
-            if( success == true )
-            {
-                ((UIApplication.shared.delegate) as! AppDelegate).initZCRMSDK()
-                print( "Login successful" )
-            }
-        }
-        
-        // Do any additional setup after loading the view.
-    }
-    
-    @objc func getQuotes()
-    {
-        print("Quotes button clicked!!!")
-        
-        ZCRMSDKUtil.getModuleDelegate(apiName: "Quotes" ).getRecords(recordParams: ZCRMQuery.GetRecordParams()) { ( result ) in
-            do
-            {
-                let resp = try result.resolve()
-                self.getLayouts( moduleAPIName : "Quotes" )
-                print(resp.data.count)
-                self.records = resp.data
-                self.pushViewController()
-            }
-            catch
-            {
-                print("Error >> \( error )")
-            }
-        }
-    }
-    
-    @objc func getInvoices()
-    {
-        print("Invoices button clicked!!!")
-        
-        ZCRMSDKUtil.getModuleDelegate(apiName: "Invoices" ).getRecords(recordParams: ZCRMQuery.GetRecordParams()) { ( result ) in
-            do
-            {
-                let resp = try result.resolve()
-                self.getLayouts( moduleAPIName : "Invoices" )
-                print(resp.data.count)
-                self.records = resp.data
-                self.pushViewController()
-            }
-            catch
-            {
-                print("Error >> \( error )")
-            }
-        }
-    }
-    
-    @objc func getCases()
-    {
-        print("Cases button clicked!!!")
-        
-        ZCRMSDKUtil.getModuleDelegate(apiName: "Cases" ).getRecords(recordParams: ZCRMQuery.GetRecordParams()) { ( result ) in
-            do
-            {
-                let resp = try result.resolve()
-                self.getLayouts( moduleAPIName : "Cases" )
-                print(resp.data.count)
-                self.records = resp.data
-                self.pushViewController()
-            }
-            catch
-            {
-                print("Error >> \( error )")
-            }
-        }
-    }
-    
-    @objc func logout()
-    {
-        ( UIApplication.shared.delegate as! AppDelegate ).logout(completion: { (success) in
-            if( success == true )
-            {
-                print("logout successful")
-            }
-        })
-    }
-    
-    func getLayouts( moduleAPIName : String )
-    {
-        ZCRMSDKUtil.getModuleDelegate( apiName : moduleAPIName ).getLayouts { ( result ) in
-            do
-            {
-                let resp = try result.resolve()
-                self.layouts = resp.data
-                self.listViewController.layouts = self.layouts
-            }
-            catch
-            {
-                print("Error >> \( error )")
-            }
-        }
-    }
-    
-    func pushViewController()
-    {
-        self.navigationController?.pushViewController( self.listViewController, animated : true )
-        self.listViewController.records = self.records
-    }
-    
-    func getContact()
-    {
-        ZCRMSDKUtil.getModuleDelegate(apiName: "Contacts").getRecords(recordParams: ZCRMQuery.GetRecordParams()) { ( result ) in
-            do
-            {
-                let resp = try result.resolve()
-                if !(resp.data.count == 1)
-                {
-                    print("Error >>>> More than one contact found")
-                }
-                else
-                {
-                    self.contact = resp.data[0]
-                    if let contactName = self.contact?.getData()[ "Last_Name" ] as? String
-                    {
-                        self.welcomeLabel.text = "Welcome, " + contactName
-                    }
-                    else
-                    {
-                        self.welcomeLabel.text = "Welcome"
-                    }
-                    if let email = self.contact?.getData()[ "Email" ] as? String
-                    {
-                        self.userLabel.text = email
-                    }
-                    self.contact?.downloadPhoto(completion: { ( photoResult ) in
-                        do
-                        {
-                            let photoResp = try photoResult.resolve()
-                            let photoData = try photoResp.getFileData()
-                            if let data = photoData
-                            {
-                                let image = UIImage(data: data)
-                                DispatchQueue.main.async {
-                                    self.viewDidAppear( true )
-                                    self.profilePhoto.image = image
-                                }
-                            }
-                        }
-                        catch
-                        {
-                            
-                        }
-                    })
-                }
-            }
-            catch
-            {
-                print("Error >>>> \( error )")
-            }
-        }
-    }
-    
-    /*
-     // MARK: - Navigation
-     
-     // In a storyboard-based application, you will often want to do a little preparation before navigation
-     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-     // Get the new view controller using segue.destination.
-     // Pass the selected object to the new view controller.
-     }
-     */
 }
 

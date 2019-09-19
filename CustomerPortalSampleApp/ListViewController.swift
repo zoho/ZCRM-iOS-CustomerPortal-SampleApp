@@ -17,9 +17,6 @@ class ListViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool)
     {
-        let logoutButton = UIBarButtonItem( title : "Logout", style : .plain, target : self, action : #selector( logout ) )
-        self.navigationItem.rightBarButtonItem = logoutButton
-        
         super.viewWillAppear( true )
         self.view = tableView
         
@@ -28,34 +25,10 @@ class ListViewController: UIViewController {
         tableView.delegate = self
     }
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        // Do any additional setup after loading the view.
-    }
-    
-    @objc func logout()
+    override func viewDidLoad()
     {
-        ( UIApplication.shared.delegate as! AppDelegate ).logout(completion: { (success) in
-            if( success == true )
-            {
-                print("logout successful")
-            }
-        })
+        super.viewDidLoad()
     }
-    
-    
-    
-    /*
-     // MARK: - Navigation
-     
-     // In a storyboard-based application, you will often want to do a little preparation before navigation
-     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-     // Get the new view controller using segue.destination.
-     // Pass the selected object to the new view controller.
-     }
-     */
-    
 }
 
 extension ListViewController : UITableViewDataSource, UITableViewDelegate
